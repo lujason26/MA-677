@@ -1,0 +1,52 @@
+---
+title: "MA 677 3.11"
+author: "Jason Lu"
+date: "2/10/2021"
+output: pdf_document
+---
+(See paper for explanation in context of the problem)
+
+Honestly, easier to think in alpha levels
+We normally use alpha = 0.05 for significance, alpha is our critical value
+  if p-value below, we reject H0
+  if p-value above, we FTR H0
+Now what if we use alpha = 0.01?
+  We make it harder to reject H0 since our p-value now has to be "super significant"
+  This makes it harder for a false alarm to happen, since we're only accepting super loud alarms
+  However, it's easier for a missed opportunity
+    If our p-value turns out to be 0.04, we would have rejected it under alpha = 0.05
+    But since alpha = 0.01, we FTR H0
+Now what if we use alpha = 0.10?
+  We make it easier to reject H0 since our p-value can be higher than usual
+  Easier for false alarms to happen since p-value can be 0.09 (which we would normally FTR H0)
+  Harder for missed opportunities since we're accepting almost anything.
+
+With this imagery of m as the critical value, it'll be easier to understand the explanation.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load("bayesplot","knitr","arm","ggplot2","rstanarm","dplyr")
+```
+
+p = 0.6 and p = 0.8
+
+```{r}
+p = seq(0.4,1.0,by=0.01)
+p.rej = 1 - pbinom(68,100,p)   # in black, 69 isn't here because we are taking out 68 with this code
+p.rej2 = 1 - pbinom(73,100,p)  # in blue
+# cbind(p,p.rej)
+xlab = c("0.4","","0.5","","0.6","","0.7","","0.8","","0.9","","1")
+ylab = c(".0","",".1","",".2","",".3","",".4","",".5","",".6","",".7","",".8","",".9","","1.0")
+
+plot(p, p.rej, yaxt="n", type="l", main="Power Curve",yaxs="i",xaxs="i",xlim=c(0.4,1),ylim=c(0,1))
+  xtick <- seq(0.4,1,by=0.05)
+  ytick <- seq(0,1,by=0.05)
+  axis(side=1,at=xtick,labels=xlab)
+  axis(side=2,at=ytick,labels=ylab,las=2)
+lines(p, p.rej2, col="blue")
+rect(xleft=.6,xright=.8,ybottom=.05,ytop=.95)
+```
+In Figure 3.7, the x-axis is differing probabilities (0.6, 0.8, etc.) and the y-axis
+is the cumulative probabilities. Black is for m=69 and Blue is for m = 73. The T1 error
+rate at 5% is at the bottom whereas the T2 error rate at 5% is the 0.95 at the top.
+We want to minimize both values so our m must be somewhere between these two numbers.
